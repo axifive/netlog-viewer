@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Chromium NetLog dump viewer",
-  "version": "0.1",
+  "version": "0.1.2",
   "description": "A standalone WebApp for viewing chrome://net-export NetLog dump files",
   "homepage_url": "https://github.com/axifive/netlog-viewer",
   "icons": {
