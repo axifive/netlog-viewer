@@ -455,8 +455,7 @@ Polymer.ImportStatus.whenLoaded = Polymer.ImportStatus.whenReady;(function () {
         writable: true
     });
     var cePolyfill = window.CustomElements && !CustomElements.useNative;
-    //document.registerElement('dom-module', DomModule);
-    customElements.define('dom-module', DomModule);
+    document.registerElement('dom-module', DomModule);
     function forceDomModulesUpgrade() {
         if (cePolyfill) {
             var script = document._currentScript || document.currentScript;
