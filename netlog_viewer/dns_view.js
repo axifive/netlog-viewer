@@ -109,7 +109,12 @@ var DnsView = (function() {
 
         var addressesCell = addNode(tr, 'td');
 
-        if (e.error != undefined) {
+        // In M87, "error" was replaced with "net_error".
+        // TODO(https://crbug.com/1122054): Remove this once M87 hits stable.
+        if (e.error != undefined)
+          e.net_error = e.error;
+
+        if (e.net_error != undefined) {
           var errorText = e.error + ' (' + netErrorToString(e.error) + ')';
           var errorNode = addTextNode(addressesCell, 'error: ' + errorText);
           addressesCell.classList.add('warning-text');
@@ -129,6 +134,10 @@ var DnsView = (function() {
           expiredSpan.classList.add('warning-text');
           addTextNode(expiredSpan, ' [Expired]');
         }
+
+        var nikCell = addNode(tr, 'td');
+        // Versions prior to M84 used lists instead of strings for logged NIKs.
+        addTextNode(nikCell, '' + e.network_isolation_key);
 
         // HostCache keeps track of how many network changes have happened since
         // it was created, and entries store what that number was at the time
