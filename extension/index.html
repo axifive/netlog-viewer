@@ -20,8 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0,
                                    maximum-scale=1.0, user-scalable=no">
-    
-    
+        
     <link type="text/css" rel="stylesheet" href="style.css"></head>
   <body><div hidden="" by-vulcanize="">
 
@@ -32,12 +31,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         
         <div id="loaded-status-view">
           <span id="loaded-status-view-dump-file-name"></span>
-      
-          
-          <select id="capture-status-view-actions">
-          </select>
         </div>
       </div>
+      <a href="https://chromium.googlesource.com/catapult/+/master/netlog_viewer/" title="NetLog viewer project page">Code</a>
     </div>
   </template>
   
@@ -85,7 +81,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <ul style="margin-top: 0">
         <li><a href="#events&amp;q=type:HOST_RESOLVER_IMPL_JOB%20is:active">View pending lookups</a></li>
       </ul>
-    
+
       <div>
         <h4>Async DNS Configuration</h4>
         <ul>
@@ -99,7 +95,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <tbody id="dns-view-internal-dns-config-tbody"></tbody>
         </table>
       </div>
-    
+
       <h4>
         Host resolver cache
       </h4>
@@ -112,7 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <li>Expired entries: <span id="dns-view-cache-expired"></span></li>
         <li>Network changes: <span id="dns-view-network-changes"></span></li>
       </ul>
-    
+
       <table class="styled-table">
         <thead>
           <tr>
@@ -121,6 +117,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <th>Addresses</th>
             <th>TTL</th>
             <th>Expires</th>
+            <th>Network Isolation Key</th>
             <th>Network changes</th>
           </tr>
         </thead>
@@ -548,17 +545,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <div id="import-view-tab-content" class="content-box">
       <div>
-        <div style="margin-bottom:20px"><b>TIP</b>: Drag-and-drop files into this window.</div>
-          <input type="file" value="Load log from file" id="import-view-load-log-file" accept=".json">
+        <div style="margin-bottom:20px"><b>TIP</b>: Drag-and-drop a netlog file into this window.</div>
+          <input type="file" id="import-view-load-log-file" accept=".json,.zip">
           <pre id="import-view-load-status-text"></pre>
       </div>
- 
+
       <div id="import-view-loaded-div" style="display: none">
         <h2>Data Loaded</h2>
         <table class="styled-table">
         <tbody><tr>
           <th>Export date</th>
           <td id="import-view-numericDate"></td>
+        </tr>
+        <tr>
+          <th>Capture Mode</th>
+          <td id="import-view-capture-mode"></td>
         </tr>
         <tr>
           <th>Build</th>
@@ -583,7 +584,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <span id="import-view-activeFieldTrialGroups"></span>
           </td>
         </tr>
-        <tr>
+        <tr id="import-view-row-addedFieldTrialGroups">
+          <th>Field Trial Groups activated during capture</th>
+          <td>
+            <span id="import-view-addedFieldTrialGroups"></span>
+          </td>
+        </tr>
+        <tr id="import-view-row-removedFieldTrialGroups">
+          <th>Field Trial Groups deactivated during capture</th>
+          <td>
+            <span id="import-view-removedFieldTrialGroups"></span>
+          </td>
+        </tr>
+        <tr id="import-view-row-user-comments">
           <th>User comments</th>
           <td>
             <pre id="import-view-user-comments"></pre>
@@ -597,6 +610,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 <dom-module id="events-view" assetpath="">
   <template>
+    
+    <div id="events-view-left-pane" class="flexcol">
     
     <div id="events-view-filter-box">
       <table width="100%">
@@ -614,6 +629,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Sort options:
       <ul>
         <li>sort:id (default)
+        </li><li>sort:active
         </li><li>sort:desc
         </li><li>sort:duration
         </li><li>sort:type
@@ -630,7 +646,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </li></ul>
     </div>
     
-    <div id="events-view-source-list">
+    <div id="events-view-source-list" class="flexfill scrollable">
       <table id="events-view-source-list-table" cellspacing="0" cellpadding="0" width="100%">
         <thead>
           <tr>
@@ -644,14 +660,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <tbody id="events-view-source-list-tbody"></tbody>
       </table>
     </div>
+    </div>
     
     <div id="events-view-splitter-box" class="vertical-splitter"></div>
     
+    <div class="flexfill scrollable">
     <div id="events-view-details-log-box" class="event-log content-box"></div>
+    </div>
   </template>
   
-</dom-module><dom-module id="timeline-view" assetpath="">
+</dom-module>
+<dom-module id="timeline-view" assetpath="">
   <template>
+    
+    <div id="timeline-view-host" class="flexfill flexrow">
     <div id="timeline-view-selection-div">
       <div style="text-align: right">
         <button id="timeline-view-selection-toggle" title="Toggle visibility of selection view" class="timeline-view-rotateleft"></button>
@@ -683,7 +705,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </li>
     </ul>
     </div>
-    <div id="timeline-view-graph-div">
+    <div class="flexfill flexcol">
+    <div id="timeline-view-graph-div" class="flexfill">
       <canvas id="timeline-view-graph-canvas">
       </canvas>
     </div>
@@ -691,39 +714,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="timeline-view-scrollbar-inner-div">
       </div>
     </div>
+    </div>
+    </div>
   </template>
   
 </dom-module>
 
 <dom-module id="netlog-viewer" assetpath="./">
   <template>
-    <div id="import-view-drop-target">  
       <top-bar-view></top-bar-view>
-    
-      <div id="tab-list">
+    <div class="flexfill flexrow"> 
+      <div id="tab-list" class="scrollable">
       </div>
-
-      <div id="main-tab-contents">
-        <proxy-view></proxy-view>
-        <dns-view></dns-view>
-        <sockets-view></sockets-view>
-        <alt-svc-view></alt-svc-view>
-        <spdy-view></spdy-view>
-        <quic-view></quic-view>
-        <reporting-view></reporting-view>
-        <http-cache-view></http-cache-view>
-        <prerender-view></prerender-view>
-        <modules-view></modules-view>
-        <import-view></import-view>
-        <events-view></events-view>
-        <timeline-view></timeline-view>
+      <div class="flexfill flexrow">
+        <proxy-view class="flexfill scrollable"></proxy-view>
+        <dns-view class="flexfill scrollable"></dns-view>
+        <sockets-view class="flexfill scrollable"></sockets-view>
+        <alt-svc-view class="flexfill scrollable"></alt-svc-view>
+        <spdy-view class="flexfill scrollable"></spdy-view>
+        <quic-view class="flexfill scrollable"></quic-view>
+        <reporting-view class="flexfill scrollable"></reporting-view>
+        <http-cache-view class="flexfill scrollable"></http-cache-view>
+        <prerender-view class="flexfill scrollable"></prerender-view>
+        <modules-view class="flexfill scrollable"></modules-view>
+        <import-view class="flexfill scrollable"></import-view>
+        <events-view class="flexfill"></events-view>
+        <timeline-view class="flexfill"></timeline-view>
       </div>
-    </div>
-
-  </template>
+  </div></template>
   
 </dom-module>
 </div>
 <netlog-viewer></netlog-viewer>
-
 <script src="bundle.js"></script></body></html>
