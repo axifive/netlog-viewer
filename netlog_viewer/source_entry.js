@@ -79,6 +79,7 @@ class SourceEntry {
 
     switch (e.source.type) {
       case EventSourceType.URL_REQUEST:
+      case EventSourceType.DOH_URL_REQUEST:
       case EventSourceType.HTTP_STREAM_JOB:
       case EventSourceType.HTTP_STREAM_JOB_CONTROLLER:
       case EventSourceType.BIDIRECTIONAL_STREAM:
@@ -105,7 +106,9 @@ class SourceEntry {
         this.description_ = e.params.key;
         break;
       case EventSourceType.CERT_VERIFIER_JOB:
+      case EventSourceType.CERT_VERIFIER_TASK:
       case EventSourceType.QUIC_SESSION:
+      case EventSourceType.QUIC_SESSION_POOL_JOB:
         if (e.params.host !== undefined) {
           this.description_ = e.params.host;
         }
@@ -150,6 +153,7 @@ class SourceEntry {
         break;
       case EventSourceType.ASYNC_HOST_RESOLVER_REQUEST:
       case EventSourceType.DNS_TRANSACTION:
+      case EventSourceType.DNS_OVER_HTTPS:
         this.description_ = e.params.hostname;
         break;
       case EventSourceType.DOWNLOAD:
@@ -163,6 +167,11 @@ class SourceEntry {
           case EventType.DOWNLOAD_ITEM_ACTIVE:
             this.description_ = e.params.file_name;
             break;
+        }
+        break;
+      case EventSourceType.WEB_TRANSPORT_CLIENT:
+        if (e.params.url) {
+          this.description_ = e.params.url;
         }
         break;
     }
@@ -225,6 +234,9 @@ class SourceEntry {
       }
 
       if (this.entries_[1].type === EventType.SOCKET_POOL_CONNECT_JOB_CREATED) {
+        return this.entries_[1];
+      }
+      if (this.entries_[1].type === EventType.CERT_VERIFY_PROC) {
         return this.entries_[1];
       }
     }

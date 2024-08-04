@@ -7,6 +7,8 @@
  * configuration headers received for Reporting-enabled origins, and any queued
  * reports that are waiting to be uploaded.
  */
+'use strict';
+
 var ReportingView = (function() {
   'use strict';
 
@@ -112,6 +114,17 @@ var ReportingView = (function() {
 
       addNodeWithText(tr, 'td', report.type);
 
+      var networkKey;
+      if ('network_anonymization_key' in report) {
+        networkKey = report.network_anonymization_key;
+      } else {
+        networkKey = report.network_isolation_key;
+        // Around M108 the network_isolation_key changed to be named
+        // network_anonymization_key, so we do this check for backwards
+        // compatibility.
+      }
+      addNodeWithText(tr, 'td', networkKey);
+
       var contentNode = addNode(tr, 'td');
       if (report.type == 'network-error')
         displayNetworkErrorContent_(contentNode, report);
@@ -204,15 +217,15 @@ var ReportingView = (function() {
       if (groups.length == 0)
         continue;
 
-      // Calculate the total number of endpoints for this origin, so that we can
-      // rowspan its origin cell.
-      var originHeight = 0;
+      // Calculate the total number of endpoints for this client, so that we can
+      // rowspan its origin and NIK cells.
+      var clientHeight = 0;
       for (var j = 0; j < groups.length; ++j) {
         var group = ensureObject_(groups[j]);
         var endpoints = ensureArray_(group.endpoints);
-        originHeight += group.endpoints.length;
+        clientHeight += group.endpoints.length;
       }
-      if (originHeight == 0)
+      if (clientHeight == 0)
         continue;
 
       for (var j = 0; j < groups.length; ++j) {
@@ -224,8 +237,20 @@ var ReportingView = (function() {
 
           if (j == 0 && k == 0) {
             var originNode = addNode(tr, 'td');
-            originNode.setAttribute('rowspan', originHeight);
+            originNode.setAttribute('rowspan', clientHeight);
             addTextNode(originNode, client.origin);
+            var nikNode = addNode(tr, 'td');
+            nikNode.setAttribute('rowspan', clientHeight);
+            var networkKey;
+            if ('network_anonymization_key' in client) {
+              networkKey = client.network_anonymization_key;
+            } else {
+              networkKey = client.network_isolation_key;
+              // Around M108 the network_isolation_key changed to be named
+              // network_anonymization_key, so we do this check for backwards
+              // compatibility.
+            }
+            addTextNode(nikNode, networkKey);
           }
 
           if (k == 0) {
@@ -331,6 +356,13 @@ var ReportingView = (function() {
       }
 
       addNodeWithText(tr, 'td', policy.reportTo);
+      if ('NetworkAnonymizationKey' in policy) {
+        // In M108 this key was changed as part of the network state
+        // partitioning project.
+        addNodeWithText(tr, 'td', policy.NetworkAnonymizationKey);
+      } else {
+        addNodeWithText(tr, 'td', policy.networkIsolationKey);
+      }
 
       var successFractionNode = addNode(tr, 'td');
       successFractionNode.classList.add('reporting-right-justified');

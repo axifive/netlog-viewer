@@ -42,7 +42,12 @@ found in the LICENSE file.
         let actualText = div.innerText;
         actualText = actualText.replace(/^\s+|\s+$/g, '');
 
-        chai.assert.strictEqual(testCase.expectedText, actualText);
+        const expectedLines = testCase.expectedText.split('\n');
+        const actualLines = actualText.split('\n');
+        for (let i = 0; i < actualLines.length; i++) {
+          chai.assert.strictEqual(expectedLines[i], actualLines[i]);
+        }
+        chai.assert.strictEqual(expectedLines.length, actualLines.length);
       }
 
       runTestCase(painterTestURLRequest());
@@ -56,6 +61,7 @@ found in the LICENSE file.
       runTestCase(painterTestBase64EncodedBytes());
       runTestCase(painterTestCertVerifierJob());
       runTestCase(painterTestCertVerifyResult());
+      runTestCase(painterTestCertVerifierTask());
       runTestCase(painterTestCheckedCert());
       runTestCase(painterTestProxyConfigOneProxyAllSchemes());
       runTestCase(painterTestProxyConfigTwoProxiesAllSchemes());
@@ -78,8 +84,7 @@ found in the LICENSE file.
     const testCase = {};
     testCase.tickOffset = 1337911098446;
     testCase.logCreationTime = 1338864634013;
-    testCase.loadFlags =
-        LoadFlag.MAIN_FRAME_DEPRECATED | LoadFlag.MAYBE_USER_GESTURE;
+    testCase.loadFlags = LoadFlag.MAIN_FRAME_DEPRECATED;
 
     testCase.logEntries = [
       {
@@ -455,15 +460,13 @@ found in the LICENSE file.
 't=1338864633224 [st=  0] +REQUEST_ALIVE  [dt=789]\n' +
 't=1338864633238 [st= 14]    URL_REQUEST_START_JOB  [dt=8]\n' +
 '                            --> load_flags = ' +
-testCase.loadFlags.toString() +
-' (MAIN_FRAME_DEPRECATED | MAYBE_USER_GESTURE)\n' +
+testCase.loadFlags.toString() + ' (MAIN_FRAME_DEPRECATED)\n' +
 '                            --> method = "GET"\n' +
 '                            --> priority = 4\n' +
 '                            --> url = "http://www.google.com/"\n' +
 't=1338864633248 [st= 24]   +URL_REQUEST_START_JOB  [dt=279]\n' +
 '                            --> load_flags = ' +
-testCase.loadFlags.toString() +
-' (MAIN_FRAME_DEPRECATED | MAYBE_USER_GESTURE)\n' +
+testCase.loadFlags.toString() + ' (MAIN_FRAME_DEPRECATED)\n' +
 '                            --> method = "GET"\n' +
 '                            --> priority = 4\n' +
 '                            --> url = "http://www.google.com/"\n' +
@@ -605,8 +608,7 @@ testCase.loadFlags.toString() +
   function painterTestNetError() {
     const testCase = {};
     testCase.tickOffset = 1337911098446;
-    testCase.loadFlags =
-        LoadFlag.MAIN_FRAME_DEPRECATED | LoadFlag.MAYBE_USER_GESTURE;
+    testCase.loadFlags = LoadFlag.MAIN_FRAME_DEPRECATED;
 
     testCase.logEntries = [
       {
@@ -726,15 +728,13 @@ testCase.loadFlags.toString() +
 't=1338864773894 [st=  0] +REQUEST_ALIVE  [dt=475]\n' +
 't=1338864773901 [st=  7]    URL_REQUEST_START_JOB  [dt=5]\n' +
 '                            --> load_flags = ' +
-testCase.loadFlags.toString() +
-' (MAIN_FRAME_DEPRECATED | MAYBE_USER_GESTURE)\n' +
+testCase.loadFlags.toString() + ' (MAIN_FRAME_DEPRECATED)\n' +
 '                            --> method = "GET"\n' +
 '                            --> priority = 4\n' +
 '                            --> url = "http://www.doesnotexistdomain.com/"\n' +
 't=1338864773906 [st= 12]   +URL_REQUEST_START_JOB  [dt=245]\n' +
 '                            --> load_flags = ' +
-testCase.loadFlags.toString() +
-' (MAIN_FRAME_DEPRECATED | MAYBE_USER_GESTURE)\n' +
+testCase.loadFlags.toString() + ' (MAIN_FRAME_DEPRECATED)\n' +
 '                            --> method = "GET"\n' +
 '                            --> priority = 4\n' +
 '                            --> url = "http://www.doesnotexistdomain.com/"\n' +
@@ -949,9 +949,8 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
       {
         'params': {
           'byte_count': 780,
-          'hex_encoded_bytes': '474554202F66617669636F6E2E69636F20485454502' +
-              'F312E310D0A486F73743A207777772E6170706C652E' +
-              '636F6D0D0A436F6E6E656374696F6E3A20'
+          'bytes': 'R0VUIC9mYXZpY29uLmljbyBIVFRQLzEuMQ0KSG9zdDogd3d3LmFwcGxlL' +
+                   'mNvbQ0KQ29ubmVjdGlvbjog'
         },
         'phase': EventPhase.PHASE_NONE,
         'source': {'id': 637, 'type': EventSourceType.SOCKET},
@@ -961,9 +960,8 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
       {
         'params': {
           'byte_count': 1024,
-          'hex_encoded_bytes': '485454502F312E3120323030204F4B0D0A4C6173742' +
-              'D4D6F6469666965643A204D6F6E2C20313920446563' +
-              '20323031312032323A34363A353920474D'
+          'bytes': 'SFRUUC8xLjEgMjAwIE9LDQpMYXN0LU1vZGlmaWVkOiBNb24sIDE5IERlY' +
+                   'yAyMDExIDIyOjQ2OjU5IEdN'
         },
         'phase': EventPhase.PHASE_NONE,
         'source': {'id': 637, 'type': EventSourceType.SOCKET},
@@ -977,7 +975,9 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
 '                          --> source_dependency = 634 (TRANSPORT_CONNECT_JOB' +
 ')\n' +
 't=1338865016933 [st=  1]   +TCP_CONNECT  [dt=5]\n' +
-'                            --> address_list = ["184.30.253.15:80"]\n' +
+'                            --> address_list = [\n' +
+'                                  "184.30.253.15:80"\n' +
+'                                ]\n' +
 't=1338865016934 [st=  2]      TCP_CONNECT_ATTEMPT  [dt=3]\n' +
 '                              --> address = "184.30.253.15:80"\n' +
 't=1338865016938 [st=  6]   -TCP_CONNECT\n' +
@@ -986,7 +986,7 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
 '                            --> source_dependency = 628 (HTTP_STREAM_JOB)\n' +
 't=1338865016957 [st= 25]      SOCKET_BYTES_SENT\n' +
 '                              --> byte_count = 780\n' +
-'                              --> hex_encoded_bytes =\n' +
+'                              --> bytes =\n' +
 '                                47 45 54 20 2F 66 61 76  69 63 6F 6E 2E 69 ' +
 '63 6F   GET /favicon.ico\n' +
 '                                20 48 54 54 50 2F 31 2E  31 0D 0A 48 6F 73 ' +
@@ -997,7 +997,7 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
 '        Connection: \n' +
 't=1338865017069 [st=137]      SOCKET_BYTES_RECEIVED\n' +
 '                              --> byte_count = 1024\n' +
-'                              --> hex_encoded_bytes =\n' +
+'                              --> bytes =\n' +
 '                                48 54 54 50 2F 31 2E 31  20 32 30 30 20 4F ' +
 '4B 0D   HTTP/1.1 200 OK.\n' +
 '                                0A 4C 61 73 74 2D 4D 6F  64 69 66 69 65 64 ' +
@@ -1176,10 +1176,197 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
         '                         --> is_issued_by_known_root = true\n' +
         '                         --> is_issued_by_additional_trust_anchor =' +
         ' false\n' +
-        '                         --> public_key_hashes = ["hash1","hash2"]';
+        '                         --> public_key_hashes = [\n' +
+        '                               "hash1",\n' +
+        '                               "hash2"\n' +
+        '                             ]';
 
     return testCase;
   }
+
+  /**
+   * Tests the formatting of CERT_VERIFIER_TASK events.
+   */
+  function painterTestCertVerifierTask() {
+    const testCase = {};
+    testCase.tickOffset = 1684513085480;
+    testCase.baseTimeTicks = '636370702';
+
+    testCase.logEntries = [
+      {
+       "phase" : EventPhase.PHASE_BEGIN,
+       "source" : {
+          "id" : -2147483638,
+          "start_time" : "636385093",
+          "type" : EventSourceType.CERT_VERIFIER_TASK
+       },
+       "time" : "636385093",
+       "type" : EventType.CERT_VERIFIER_TASK
+      },
+      {
+         "params" : {
+            "certificates" : [
+               "-----BEGIN CERTIFICATE-----\n1\n-----END CERTIFICATE-----\n",
+               "-----BEGIN CERTIFICATE-----\n2\n-----END CERTIFICATE-----\n"
+            ],
+            "crlset_is_expired" : true,
+            "crlset_sequence" : 7957,
+            "host" : "example.com",
+            "verify_flags" : 17
+         },
+         "phase" : EventPhase.PHASE_BEGIN,
+         "source" : {
+            "id" : -2147483638,
+            "start_time" : "636385093",
+            "type" : EventSourceType.CERT_VERIFIER_TASK
+         },
+         "time" : "636385093",
+         "type" : EventType.CERT_VERIFY_PROC
+      },
+      {
+         "params" : {
+            "digest_policy" : 0
+         },
+         "phase" : EventPhase.PHASE_BEGIN,
+         "source" : {
+            "id" : -2147483638,
+            "start_time" : "636385093",
+            "type" : EventSourceType.CERT_VERIFIER_TASK
+         },
+         "time" : "636385094",
+         "type" : EventType.CERT_VERIFY_PROC_PATH_BUILD_ATTEMPT
+      },
+      {
+         "params" : {
+            "certificates" : [
+               "-----BEGIN CERTIFICATE-----\n1\n-----END CERTIFICATE-----\n",
+               "-----BEGIN CERTIFICATE-----\n2\n-----END CERTIFICATE-----\n",
+               "-----BEGIN CERTIFICATE-----\n3\n-----END CERTIFICATE-----\n"
+            ],
+            "errors" : "----- Certificate i=0 (CN=example.com) -----\nERROR: Time is after notAfter\n\n----- Certificate i=1 (CN=IntermediateCA) -----\nERROR: Time is after notAfter\n\n",
+            "is_valid" : false,
+            "last_cert_trust" : "TRUSTED_ANCHOR"
+         },
+         "phase" : EventPhase.PHASE_NONE,
+         "source" : {
+            "id" : -2147483638,
+            "start_time" : "636385093",
+            "type" : EventSourceType.CERT_VERIFIER_TASK
+         },
+         "time" : "636385097",
+         "type" : EventType.CERT_VERIFY_PROC_PATH_BUILT
+      },
+      {
+         "params" : {
+            "best_result_index" : 0,
+            "has_valid_path" : false
+         },
+         "phase" : EventPhase.PHASE_END,
+         "source" : {
+            "id" : -2147483638,
+            "start_time" : "636385093",
+            "type" : EventSourceType.CERT_VERIFIER_TASK
+         },
+         "time" : "636385097",
+         "type" : EventType.CERT_VERIFY_PROC_PATH_BUILD_ATTEMPT
+      },
+      {
+         "params" : {
+            "cert_status" : 2,
+            "is_issued_by_known_root" : true,
+            "net_error" : -201,
+            "public_key_hashes" : [
+               "sha256/9SLklscvzMYj8f+52lp5ze/hY0CFHyLSPQzSpYYIBm8=",
+               "sha256/5kJvNEMw0KjrCAu7eXY5HZdvyCS13BbA0VJG1RSP91w=",
+               "sha256/r/mIkG3eEpVdm+u/ko/cwxzOMo1bk4TyHIlByibiA5E="
+            ],
+            "scts" : {
+               "scts" : []
+            },
+            "verified_cert" : {
+               "certificates" : [
+                  "-----BEGIN CERTIFICATE-----\n1\n-----END CERTIFICATE-----\n",
+                  "-----BEGIN CERTIFICATE-----\n2\n-----END CERTIFICATE-----\n",
+                  "-----BEGIN CERTIFICATE-----\n3\n-----END CERTIFICATE-----\n"
+               ]
+            }
+         },
+         "phase" : EventPhase.PHASE_END,
+         "source" : {
+            "id" : -2147483638,
+            "start_time" : "636385093",
+            "type" : EventSourceType.CERT_VERIFIER_TASK
+         },
+         "time" : "636385097",
+         "type" : EventType.CERT_VERIFY_PROC
+      },
+      {
+         "phase" : EventPhase.PHASE_END,
+         "source" : {
+            "id" : -2147483638,
+            "start_time" : "636385093",
+            "type" : EventSourceType.CERT_VERIFIER_TASK
+         },
+         "time" : "636385111",
+         "type" : EventType.CERT_VERIFIER_TASK
+      }
+    ];
+
+    testCase.expectedText =
+'t=14391 [st= 0] +CERT_VERIFIER_TASK  [dt=18]\n' +
+'t=14391 [st= 0]   +CERT_VERIFY_PROC  [dt=4]\n' +
+'                   --> verify_flags = 17 (VERIFY_REV_CHECKING_ENABLED | VERIFY_DISABLE_NETWORK_FETCHES)\n' +
+'                   --> certificates = [\n' +
+'                         "-----BEGIN CERTIFICATE-----\\n1\\n-----END CERTIFICATE-----\\n",\n' +
+'                         "-----BEGIN CERTIFICATE-----\\n2\\n-----END CERTIFICATE-----\\n"\n' +
+'                       ]\n' +
+'                   --> crlset_is_expired = true\n' +
+'                   --> crlset_sequence = 7957\n' +
+'                   --> host = "example.com"\n' +
+'t=14392 [st= 1]     +CERT_VERIFY_PROC_PATH_BUILD_ATTEMPT  [dt=3]\n' +
+'                     --> digest_policy = 0 (kStrong)\n' +
+'t=14395 [st= 4]        CERT_VERIFY_PROC_PATH_BUILT\n' +
+'                       --> errors =\n' +
+'                              ----- Certificate i=0 (CN=example.com) -----\n' +
+'                              ERROR: Time is after notAfter\n' +
+'                              \n' +
+'                              ----- Certificate i=1 (CN=IntermediateCA) -----\n' +
+'                              ERROR: Time is after notAfter\n' +
+'                              \n' +
+'                              \n' +
+'                       --> certificates = [\n' +
+'                             "-----BEGIN CERTIFICATE-----\\n1\\n-----END CERTIFICATE-----\\n",\n' +
+'                             "-----BEGIN CERTIFICATE-----\\n2\\n-----END CERTIFICATE-----\\n",\n' +
+'                             "-----BEGIN CERTIFICATE-----\\n3\\n-----END CERTIFICATE-----\\n"\n' +
+'                           ]\n' +
+'                       --> is_valid = false\n' +
+'                       --> last_cert_trust = "TRUSTED_ANCHOR"\n' +
+'t=14395 [st= 4]     -CERT_VERIFY_PROC_PATH_BUILD_ATTEMPT\n' +
+'                     --> best_result_index = 0\n' +
+'                     --> has_valid_path = false\n' +
+'t=14395 [st= 4]   -CERT_VERIFY_PROC\n' +
+'                   --> cert_status = 2 (DATE_INVALID)\n' +
+'                   --> is_issued_by_known_root = true\n' +
+'                   --> net_error = -201 (ERR_CERT_DATE_INVALID)\n' +
+'                   --> public_key_hashes = [\n' +
+'                         "sha256/9SLklscvzMYj8f+52lp5ze/hY0CFHyLSPQzSpYYIBm8=",\n' +
+'                         "sha256/5kJvNEMw0KjrCAu7eXY5HZdvyCS13BbA0VJG1RSP91w=",\n' +
+'                         "sha256/r/mIkG3eEpVdm+u/ko/cwxzOMo1bk4TyHIlByibiA5E="\n' +
+'                       ]\n' +
+'                   --> scts = {\n' +
+'                         "scts": []\n' +
+'                       }\n' +
+'                   --> verified_cert = {\n' +
+'                         "certificates": [\n' +
+'                           "-----BEGIN CERTIFICATE-----\\n1\\n-----END CERTIFICATE-----\\n",\n' +
+'                           "-----BEGIN CERTIFICATE-----\\n2\\n-----END CERTIFICATE-----\\n",\n' +
+'                           "-----BEGIN CERTIFICATE-----\\n3\\n-----END CERTIFICATE-----\\n"\n' +
+'                         ]\n' +
+'                       }\n' +
+'t=14409 [st=18] -CERT_VERIFIER_TASK';
+    return testCase;
+  }
+
 
   /**
    * Tests the formatting of checked certificates
@@ -1359,8 +1546,10 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
 
     testCase.expectedText =
         't=1338864633356 [st=0]  HTTP_TRANSACTION_SEND_REQUEST_HEADERS\n' +
-        '                        --> headersWRONG = ["Host: www.google.com",' +
-        '"Connection: keep-alive"]\n' +
+        '                        --> headersWRONG = [\n' +
+        '                              "Host: www.google.com",\n' +
+        '                              "Connection: keep-alive"\n' +
+        '                            ]\n' +
         '                        --> line = "GET / HTTP/1.1\\r\\n"';
 
     return testCase;
@@ -1373,8 +1562,7 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
   function painterTestInProgressURLRequest() {
     const testCase = {};
     testCase.tickOffset = 1337911098446;
-    testCase.loadFlags =
-        LoadFlag.MAIN_FRAME_DEPRECATED | LoadFlag.MAYBE_USER_GESTURE;
+    testCase.loadFlags = LoadFlag.MAIN_FRAME_DEPRECATED;
 
     testCase.logEntries = [
       {
@@ -1413,7 +1601,7 @@ QuicError.QUIC_NETWORK_IDLE_TIMEOUT + ' (QUIC_NETWORK_IDLE_TIMEOUT)';
 't=1338864773994 [st=  0] +REQUEST_ALIVE  [dt=375]\n' +
 '                          --> load_flags = ' +
 testCase.loadFlags.toString() +
-' (MAIN_FRAME_DEPRECATED | MAYBE_USER_GESTURE)\n' +
+' (MAIN_FRAME_DEPRECATED)\n' +
 '                          --> load_state = ' +
 LoadState.READING_RESPONSE + ' (READING_RESPONSE)\n' +
 '                          --> method = "GET"\n' +
