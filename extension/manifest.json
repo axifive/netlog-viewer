@@ -1,7 +1,8 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Chromium NetLog dump viewer",
-  "version": "0.2.1",
+  "short_name": "NetLog viewer",
+  "version": "0.3.0",
   "description": "A standalone WebApp for viewing chrome://net-export NetLog dump files",
   "homepage_url": "https://github.com/axifive/netlog-viewer",
   "icons": {
@@ -11,11 +12,10 @@
     "128": "images/icon-128.png"
   },
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "service_worker": "service_worker.js",
+    "type": "module"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "images/icon-16.png",
       "32": "images/icon-32.png",
@@ -24,5 +24,5 @@
     },
     "default_title": "NetLog dump viewer"
   },
-  "offline_enabled": true
+  "minimum_chrome_version": "88"
 }

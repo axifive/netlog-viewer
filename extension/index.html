@@ -20,7 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0,
                                    maximum-scale=1.0, user-scalable=no">
-        
+    
+    
     <link type="text/css" rel="stylesheet" href="style.css"></head>
   <body><div hidden="" by-vulcanize="">
 
@@ -83,12 +84,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </ul>
 
       <div>
-        <h4>Async DNS Configuration</h4>
+        <h4>
+          Async DNS Configuration
+          <small>
+            [<a href="https://chromium.googlesource.com/chromium/src/+/main/net/dns/README.md#dns" target="blank">//net/dns/README.md#dns</a>]
+          </small>
+        </h4>
         <ul>
-          <li>Internal DNS client enabled:
-            <span id="dns-view-internal-dns-enabled"></span>
-            <span id="dns-view-internal-dns-invalid-config" class="warning-text" style="display: none;">
-              (No valid configuration found)</span>
+          <li>
+            Internal DNS client enabled for insecure queries (Do53):
+            <span id="dns-view-internal-dns-enabled-for-insecure"></span>
+          </li>
+          <li>
+            Internal DNS client enabled for secure queries (DoH):
+            <span id="dns-view-internal-dns-enabled-for-secure"></span>
+          </li>
+          <li>
+            Disabled DoH providers:
+            <ul id="dns-view-internal-disabled-doh-providers"></ul>
           </li>
         </ul>
         <table class="styled-table">
@@ -117,7 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <th>Addresses</th>
             <th>TTL</th>
             <th>Expires</th>
-            <th>Network Isolation Key</th>
+            <th>Network Anonymization Key</th>
             <th>Network changes</th>
           </tr>
         </thead>
@@ -375,6 +388,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <th>URL</th>
               <th>Status</th>
               <th>Type</th>
+              <th>Network Anonymization Key</th>
               <th>Content</th>
             </tr>
           </thead>
@@ -388,6 +402,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <thead>
             <tr>
               <th>Origin</th>
+              <th>Network Anonymization Key</th>
               <th>Group</th>
               <th>Subdomains?</th>
               <th>Expires</th>
@@ -413,6 +428,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <th>Subdomains?</th>
               <th>Expires</th>
               <th>Group</th>
+              <th>Network Anonymization Key</th>
               <th>Success %</th>
               <th>Failure %</th>
             </tr>
@@ -723,7 +739,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="netlog-viewer" assetpath="./">
   <template>
       <top-bar-view></top-bar-view>
-    <div class="flexfill flexrow"> 
+      <div class="flexfill flexrow">
       <div id="tab-list" class="scrollable">
       </div>
       <div class="flexfill flexrow">
